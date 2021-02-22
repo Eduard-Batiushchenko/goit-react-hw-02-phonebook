@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import Container from './Components/Container/Container';
-import Contacts from './Components/Contacts/Contacts';
 import shortid from 'shortid';
+import Contacts from './Components/Contacts/Contacts';
+import ContactForm from './Components/ContactForm/ContactForm';
+import Filter from './Components/Filter/Filter';
+import style from './App.module.css';
 
 class App extends Component {
   state = {
@@ -11,63 +14,44 @@ class App extends Component {
       { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
       { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
     ],
-    name: '',
-    number: '',
+    filter: '',
   };
 
-  handleName = e => {
-    const currentInput = e.currentTarget.name;
-    this.setState({ [currentInput]: e.target.value });
-  };
-
-  addToContact = e => {
-    e.preventDefault();
-    const randomId = shortid.generate();
+  deleteContact = id => {
     this.setState(prevState => {
-      return {
-        contacts: [
-          ...prevState.contacts,
-          { name: this.state.name, number: this.state.number, id: randomId },
-        ],
-      };
+      return { contacts: prevState.contacts.filter(el => el.id !== id) };
     });
-    this.reset();
   };
 
-  reset = () => {
-    this.setState({ name: '', number: '' });
+  formSubmitHandler = data => {
+    data = { ...data, id: shortid.generate() };
+
+    const result = this.state.contacts.some(el => el.name === data.name);
+    !result
+      ? this.setState({ contacts: [...this.state.contacts, data] })
+      : alert(`${data.name} contact already exist`);
+  };
+
+  handleFilterInput = async filterValue => {
+    await this.setState({ filter: filterValue });
   };
 
   render() {
+    const { contacts, filter } = this.state;
+
+    const filterInpurt = contacts.filter(el =>
+      el.name.toLowerCase().includes(filter.toLowerCase()),
+    );
     return (
       <Container>
-        <h1>Phonebook</h1>
-        <form onSubmit={this.addToContact}>
-          <label>
-            {' '}
-            Name
-            <input
-              type="text"
-              name="name"
-              value={this.state.name}
-              onChange={this.handleName}
-              required
-            />
-            <label>
-              Number
-              <input
-                type="number"
-                name="number"
-                value={this.state.number}
-                onChange={this.handleName}
-                required
-              />
-            </label>
-            <button type="submit">Add contact</button>
-          </label>
-        </form>
-        <h2>Contacts:</h2>
-        <Contacts contacts={this.state.contacts} />
+        <h1 className={style.title}>Phonebook</h1>
+        <ContactForm onSubmit={this.formSubmitHandler} />
+        <h2 className={style.title}>Contacts:</h2>
+        <Filter handleFilterInput={this.handleFilterInput} />
+        <Contacts
+          filterInpurt={filterInpurt}
+          deleteContact={this.deleteContact}
+        />
       </Container>
     );
   }
