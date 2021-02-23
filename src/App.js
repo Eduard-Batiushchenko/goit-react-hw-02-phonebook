@@ -32,8 +32,8 @@ class App extends Component {
       : alert(`${data.name} contact already exist`);
   };
 
-  handleFilterInput = async filterValue => {
-    await this.setState({ filter: filterValue });
+  handleFilterInput = filterValue => {
+    this.setState({ filter: filterValue });
   };
 
   render() {
